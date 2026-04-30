@@ -1,7 +1,7 @@
 # Telegram Generator — Статус проекта
 
 **Дата:** 2026-04-30
-**Статус:** Готов к тестированию коллегами
+**Статус:** v2.0 — LLM-склонение должностей
 
 ---
 
@@ -14,7 +14,8 @@
 
 ### Функционал
 - Парсинг Excel с данными сотрудников (колонки: Организация, ФИО, Должность, Адрес, Ответственный)
-- Автоматическое склонение ФИО и должностей в дательный падеж (pytrovich + pymorphy3)
+- Автоматическое склонение ФИО в дательный падеж (pytrovich)
+- **LLM-склонение должностей** через OpenRouter (gpt-4o-mini) — корректно склоняет сложные конструкции
 - Определение пола по отчеству (ич/на)
 - Генерация Word документов с заменой меток
 - Все вставки преобразуются в CAPS
@@ -22,7 +23,7 @@
 - Имена файлов: `Фамилия_ИО_Организация.docx`
 
 ### Шаблоны
-- Пример таблицы: `word_templates/primer_tablicy.xlsx` (127 реальных записей из 4 файлов коллег)
+- Пример таблицы: `word_templates/primer_tablicy.xlsx` (254 реальных записей)
 - Пример шаблона: `word_templates/primer_shablona.docx` (формат 1-в-1 как оригинал)
 
 ### Метки в шаблоне
@@ -44,14 +45,16 @@ telegram-generator/
 ├── app/
 │   ├── main.py                    # FastAPI endpoints
 │   ├── services/
-│   │   ├── declension.py          # Склонение ФИО/должностей
+│   │   ├── declension.py          # Склонение ФИО
+│   │   ├── llm_declension.py      # LLM-склонение должностей (OpenRouter)
 │   │   ├── word_generator.py      # Генерация Word
 │   │   └── excel_parser.py        # Парсинг Excel
 │   └── templates/
 │       └── index.html             # Веб-интерфейс
 ├── word_templates/
 │   ├── primer_shablona.docx       # Пример шаблона
-│   └── primer_tablicy.xlsx        # Пример таблицы
+│   └── primer_tablicy.xlsx        # Пример таблицы (254 записи)
+├── .env                           # OPENROUTER_API_KEY (не в git)
 └── README.md                      # Этот файл
 ```
 
@@ -62,6 +65,13 @@ telegram-generator/
 ```bash
 cd /mnt/c/Users/pyramidheadshark/Repos/telegram-generator
 nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8888 > /tmp/server.log 2>&1 &
+```
+
+### Конфигурация (.env)
+
+```
+TUNA_TOKEN=tt_xxx              # Для туннеля
+OPENROUTER_API_KEY=sk-or-v1-xxx  # Для LLM-склонения должностей
 ```
 
 ---
@@ -76,13 +86,14 @@ nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8888 > /tmp/server.log 2
 
 ## Источники данных
 
-Объединённая таблица создана из 4 файлов:
+Объединённая таблица создана из 5 файлов:
 - `Копия Маркеева ОА 2026 (1).xlsx` — 80 записей
 - `Телег_Бакулин Э_.xlsx` — 27 записей
 - `Телеграм_Григорьева Е_ (003).xlsx` — 1 запись
 - `Телеграм_Червяк И_.xlsx` — 19 записей (1 уволенный исключён)
+- `Шаблон список для запонления ПРИМЕР ЗАПОЛНЕНИЯ.xlsx` — 127 записей
 
-**Итого:** 127 записей
+**Итого:** 254 записи
 
 ---
 
