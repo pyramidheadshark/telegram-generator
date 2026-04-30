@@ -7,37 +7,35 @@ from docx.text.paragraph import Paragraph
 from docx.text.run import Run
 
 
-def _highlight_run(run: Run) -> None:
-    run.font.highlight_color = WD_COLOR_INDEX.GREEN
+def _replace_in_run(run: Run, placeholder: str, value: str, highlight: bool) -> bool:
+    """Replace placeholder in a single run, return True if replaced."""
+    if placeholder not in run.text:
+        return False
+    
+    new_text = run.text.replace(placeholder, value)
+    run.text = new_text
+    
+    if highlight:
+        run.font.highlight_color = WD_COLOR_INDEX.GREEN
+    
+    return True
 
 
 def _replace_in_paragraph(paragraph: Paragraph, replacements: dict[str, str], highlight: bool) -> None:
+    """Replace placeholders in paragraph, preserving formatting."""
     full_text = paragraph.text
     if not full_text:
         return
-
-    has_replacements = any(placeholder in full_text for placeholder in replacements)
+    
+    has_replacements = any(p in full_text for p in replacements)
     if not has_replacements:
         return
-
-    new_text = full_text
+    
     for placeholder, value in replacements.items():
-        new_text = new_text.replace(placeholder, value)
-
-    if new_text == full_text:
-        return
-
-    for run in paragraph.runs:
-        run.text = ""
-
-    if paragraph.runs:
-        paragraph.runs[0].text = new_text
-        if highlight:
-            _highlight_run(paragraph.runs[0])
-    else:
-        run = paragraph.add_run(new_text)
-        if highlight:
-            _highlight_run(run)
+        if placeholder in full_text:
+            for run in paragraph.runs:
+                if placeholder in run.text:
+                    _replace_in_run(run, placeholder, value, highlight)
 
 
 def _replace_in_table(table, replacements: dict[str, str], highlight: bool) -> None:
