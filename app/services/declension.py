@@ -6,6 +6,8 @@ from pytrovich.enums import Gender as PytrovichGender
 from pytrovich.enums import NamePart
 from pytrovich.maker import PetrovichDeclinationMaker
 
+from .llm_declension import decline_job_title_llm
+
 
 class Gender(str, Enum):
     M = "M"
@@ -77,18 +79,8 @@ def decline_position(position: str) -> str:
         return ""
 
     is_upper = _is_uppercase(position)
-    
-    words = position.split()
-    declined_words = []
-
-    for word in words:
-        w_title = word.title() if is_upper else word
-        parsed = _morph.parse(w_title)[0]
-        declined = parsed.inflect({"datv"})
-        result = declined.word if declined else w_title
-        declined_words.append(_apply_case(result, is_upper))
-
-    return " ".join(declined_words)
+    result = decline_job_title_llm(position.title() if is_upper else position)
+    return _apply_case(result, is_upper)
 
 
 def get_greeting(gender: Gender) -> str:
