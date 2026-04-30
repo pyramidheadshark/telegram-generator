@@ -1,0 +1,81 @@
+from enum import Enum
+
+import pymorphy3
+from pytrovich.enums import Case
+from pytrovich.enums import Gender as PytrovichGender
+from pytrovich.enums import NamePart
+from pytrovich.maker import PetrovichDeclinationMaker
+
+
+class Gender(str, Enum):
+    M = "M"
+    F = "F"
+
+
+_morph = pymorphy3.MorphAnalyzer()
+_maker = PetrovichDeclinationMaker()
+
+
+def detect_gender(firstname: str, patronymic: str) -> Gender:
+    if not patronymic:
+        if not firstname:
+            return Gender.M
+        parsed = _morph.parse(firstname)[0]
+        if "femn" in parsed.tag:
+            return Gender.F
+        return Gender.M
+
+    patronymic_lower = patronymic.lower()
+    if patronymic_lower.endswith("ич") or patronymic_lower.endswith("ьич"):
+        return Gender.M
+    if patronymic_lower.endswith("на"):
+        return Gender.F
+
+    parsed = _morph.parse(patronymic)[0]
+    if "femn" in parsed.tag:
+        return Gender.F
+    return Gender.M
+
+
+def decline_fio(surname: str, firstname: str, patronymic: str, gender: Gender) -> str:
+    pytrovich_gender = PytrovichGender.MALE if gender == Gender.M else PytrovichGender.FEMALE
+
+    declined_parts = []
+
+    if surname:
+        declined = _maker.make(NamePart.LASTNAME, pytrovich_gender, Case.DATIVE, surname)
+        declined_parts.append(declined)
+
+    if firstname:
+        declined = _maker.make(NamePart.FIRSTNAME, pytrovich_gender, Case.DATIVE, firstname)
+        declined_parts.append(declined)
+
+    if patronymic:
+        declined = _maker.make(NamePart.MIDDLENAME, pytrovich_gender, Case.DATIVE, patronymic)
+        declined_parts.append(declined)
+
+    return " ".join(declined_parts).upper()
+
+
+def decline_position(position: str) -> str:
+    if not position:
+        return ""
+
+    words = position.split()
+    declined_words = []
+
+    for word in words:
+        parsed = _morph.parse(word)[0]
+        declined = parsed.inflect({"datv"})
+        declined_words.append(declined.word if declined else word)
+
+    return " ".join(declined_words)
+
+
+def get_greeting(gender: Gender) -> str:
+    return "УВАЖАЕМЫЙ" if gender == Gender.M else "УВАЖАЕМАЯ"
+
+
+def get_name_for_greeting(firstname: str, patronymic: str) -> str:
+    parts = [p for p in [firstname, patronymic] if p]
+    return " ".join(parts).upper()

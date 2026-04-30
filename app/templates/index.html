@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор телеграмм</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="loading-indicator" class="htmx-indicator fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent"></div>
+            <span class="text-gray-700 font-medium">Обработка...</span>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">Генератор телеграмм</h1>
+            <p class="text-lg text-gray-600">Автоматическое создание поздравительных телеграмм из данных Excel</p>
+        </header>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Шаблоны
+            </h2>
+            <p class="text-gray-600 mb-4">Скачайте шаблоны для заполнения данных:</p>
+            <div class="flex flex-wrap gap-4">
+                <a href="/template/excel" 
+                   class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Скачать шаблон Excel
+                </a>
+                <a href="/template/word" 
+                   class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Скачать пример шаблона Word
+                </a>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                Загрузка файлов
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Файл Excel с данными</label>
+                    <form hx-post="/upload/excel" 
+                          hx-encoding="multipart/form-data" 
+                          hx-target="#excel-preview"
+                          hx-indicator="#loading-indicator"
+                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
+                          id="excel-form">
+                        <input type="file" name="file" accept=".xlsx,.xls" class="hidden" id="excel-input">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-gray-600 mb-2">Перетащите Excel файл сюда</p>
+                        <p class="text-sm text-gray-500">или нажмите для выбора</p>
+                        <button type="submit" class="hidden">Загрузить</button>
+                    </form>
+                    <div id="excel-status" class="mt-2 text-sm"></div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">Шаблон Word (необязательно)</label>
+                    <form hx-post="/upload/word" 
+                          hx-encoding="multipart/form-data" 
+                          hx-target="#word-info"
+                          hx-indicator="#loading-indicator"
+                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
+                          id="word-form">
+                        <input type="file" name="file" accept=".docx" class="hidden" id="word-input">
+                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-gray-600 mb-2">Перетащите Word файл сюда</p>
+                        <p class="text-sm text-gray-500">или нажмите для выбора</p>
+                        <button type="submit" class="hidden">Загрузить</button>
+                    </form>
+                    <div id="word-info" class="mt-2 text-sm"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6" id="data-section" style="display: none;">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                Предпросмотр данных
+            </h2>
+            <div id="excel-preview">
+                <p class="text-gray-500 italic">Загрузите Excel файл для просмотра данных</p>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6" id="preview-section" style="display: none;">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Предпросмотр документа
+            </h2>
+            <div id="preview-container">
+                <div hx-get="/preview" hx-trigger="load" hx-target="#preview-container">
+                    <p class="text-gray-500 italic">Загрузите файлы для предпросмотра</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6 text-center" id="generate-section" style="display: none;">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Готово к генерации</h2>
+            <p class="text-gray-600 mb-6">Нажмите кнопку для создания телеграмм</p>
+            <button hx-post="/generate"
+                    hx-indicator="#loading-indicator"
+                    hx-on::hx-response-error="alert('Ошибка при генерации: ' + event.detail.error)"
+                    class="inline-flex items-center gap-3 bg-accent-600 hover:bg-accent-700 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg hover:shadow-xl text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                Сгенерировать телеграммы
+            </button>
+        </section>
+
+        <section class="bg-white rounded-xl shadow-md p-6 mb-6">
+            <button class="w-full flex items-center justify-between text-left"
+                    onclick="toggleInstructions()"
+                    type="button">
+                <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Инструкция
+                </h2>
+                <svg class="w-6 h-6 text-gray-500 transform transition-transform" id="instructions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="instructions-content" class="hidden mt-4">
+                {% include 'partials/instructions.html' %}
+            </div>
+        </section>
+
+        <footer class="text-center text-gray-500 text-sm mt-8">
+            <p>Генератор телеграмм &copy; 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleInstructions() {
+            const content = document.getElementById('instructions-content');
+            const arrow = document.getElementById('instructions-arrow');
+            content.classList.toggle('hidden');
+            arrow.classList.toggle('rotate-180');
+        }
+
+        document.querySelectorAll('.upload-zone').forEach(zone => {
+            zone.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'BUTTON') {
+                    this.querySelector('input[type="file"]').click();
+                }
+            });
+
+            const input = zone.querySelector('input[type="file"]');
+            input.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const form = this.closest('form');
+                    const fileName = this.files[0].name;
+                    const statusDiv = form.id === 'excel-form' 
+                        ? document.getElementById('excel-status') 
+                        : document.getElementById('word-info');
+                    statusDiv.innerHTML = '<span class="text-primary-600">Файл: ' + fileName + '</span>';
+                    form.dispatchEvent(new Event('submit', { cancelable: true }));
+                }
+            });
+
+            zone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('border-primary-500', 'bg-primary-50');
+            });
+
+            zone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('border-primary-500', 'bg-primary-50');
+            });
+
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('border-primary-500', 'bg-primary-50');
+                const input = this.querySelector('input[type="file"]');
+                if (e.dataTransfer.files.length > 0) {
+                    input.files = e.dataTransfer.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.target.id === 'excel-preview') {
+                document.getElementById('data-section').style.display = 'block';
+                document.getElementById('preview-section').style.display = 'block';
+                document.getElementById('generate-section').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
