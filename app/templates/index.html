@@ -28,6 +28,7 @@
         .btn-secondary:hover { background: #4b5563; }
         .btn-success { background: #22c55e; color: white; }
         .btn-success:hover { background: #16a34a; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
         .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 600px) { .upload-grid { grid-template-columns: 1fr; } }
@@ -42,18 +43,41 @@
         .generate-btn { padding: 16px 40px; font-size: 18px; }
         .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
         .info-box code { background: white; padding: 2px 8px; border-radius: 4px; color: #3b82f6; }
+        .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin-bottom: 16px; color: #991b1b; display: none; }
+        .error-box.visible { display: block; }
+        .error-title { font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .error-list { margin: 0; padding-left: 20px; }
+        .success-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 16px; color: #166534; display: none; }
+        .success-box.visible { display: block; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
         th { background: #f9fafb; font-weight: 600; }
         code.tag { background: #f3f4f6; padding: 4px 8px; border-radius: 4px; color: #3b82f6; font-family: monospace; }
         .tip { background: #fefce8; border: 1px solid #fef08a; border-radius: 8px; padding: 16px; margin-top: 16px; }
         input[type="file"] { display: none; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Генератор телеграмм</h1>
         <p class="subtitle">Создание поздравительных телеграмм из таблицы данных</p>
+
+        <div id="errorBox" class="error-box">
+            <div class="error-title">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Произошла ошибка
+            </div>
+            <ul class="error-list" id="errorList"></ul>
+        </div>
+
+        <div id="successBox" class="success-box">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span id="successText">Телеграммы успешно сгенерированы!</span>
+            </div>
+        </div>
 
         <div class="section">
             <div class="step">
@@ -79,7 +103,7 @@
                 <div class="step-title">Загрузите файлы</div>
             </div>
             
-            <form action="/generate" method="post" enctype="multipart/form-data" id="mainForm">
+            <form id="mainForm">
                 <div class="upload-grid">
                     <div class="upload-box" onclick="document.getElementById('excelFile').click()">
                         <input type="file" name="excel_file" id="excelFile" accept=".xlsx,.xls" required>
@@ -97,9 +121,9 @@
                 </div>
 
                 <div class="generate-box" style="margin-top: 24px;">
-                    <button type="submit" class="btn btn-success generate-btn">
+                    <button type="submit" class="btn btn-success generate-btn" id="generateBtn">
                         <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                        Сгенерировать телеграммы
+                        <span id="btnText">Сгенерировать телеграммы</span>
                     </button>
                 </div>
             </form>
@@ -137,6 +161,49 @@
     </div>
 
     <script>
+        const errorBox = document.getElementById('errorBox');
+        const errorList = document.getElementById('errorList');
+        const successBox = document.getElementById('successBox');
+        const successText = document.getElementById('successText');
+        const generateBtn = document.getElementById('generateBtn');
+        const btnText = document.getElementById('btnText');
+
+        function showError(messages) {
+            errorList.innerHTML = '';
+            if (Array.isArray(messages)) {
+                messages.forEach(msg => {
+                    const li = document.createElement('li');
+                    li.textContent = msg;
+                    errorList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = messages;
+                errorList.appendChild(li);
+            }
+            errorBox.classList.add('visible');
+            successBox.classList.remove('visible');
+        }
+
+        function hideError() {
+            errorBox.classList.remove('visible');
+        }
+
+        function showSuccess(text) {
+            successText.textContent = text;
+            successBox.classList.add('visible');
+            hideError();
+        }
+
+        function setLoading(loading) {
+            generateBtn.disabled = loading;
+            if (loading) {
+                btnText.innerHTML = '<span class="spinner">⏳</span> Генерация...';
+            } else {
+                btnText.textContent = 'Сгенерировать телеграммы';
+            }
+        }
+
         document.getElementById('excelFile').addEventListener('change', function() {
             const box = this.closest('.upload-box');
             const label = document.getElementById('excelLabel');
@@ -145,6 +212,7 @@
                 label.classList.add('upload-filename');
                 box.classList.add('selected');
             }
+            hideError();
         });
         
         document.getElementById('wordFile').addEventListener('change', function() {
@@ -154,6 +222,75 @@
                 label.textContent = this.files[0].name;
                 label.classList.add('upload-filename');
                 box.classList.add('selected');
+            }
+            hideError();
+        });
+
+        document.getElementById('mainForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const excelFile = document.getElementById('excelFile').files[0];
+            const wordFile = document.getElementById('wordFile').files[0];
+            
+            if (!excelFile) {
+                showError('Выберите таблицу с данными (.xlsx файл)');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('excel_file', excelFile);
+            if (wordFile) {
+                formData.append('word_file', wordFile);
+            }
+
+            hideError();
+            setLoading(true);
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = 'telegrammy.zip';
+                    if (contentDisposition) {
+                        const match = contentDisposition.match(/filename=(.+)/);
+                        if (match) filename = match[1];
+                    }
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                    
+                    showSuccess('Архив с телеграммами скачан: ' + filename);
+                } else {
+                    const data = await response.json();
+                    let errorMsg = data.detail || 'Неизвестная ошибка';
+                    
+                    if (errorMsg.includes('Missing placeholders')) {
+                        showError('В шаблоне не найдены обязательные метки. Проверьте, что все метки указаны: {{адрес}}, {{организация}}, {{должность_дат}}, {{фио_дат}}, {{имя_отчество}}, {{уважаемый}}');
+                    } else if (errorMsg.includes('Unknown placeholders')) {
+                        showError('В шаблоне найдены неизвестные метки. Используйте только разрешённые метки: {{адрес}}, {{организация}}, {{должность_дат}}, {{фио_дат}}, {{имя_отчество}}, {{уважаемый}}');
+                    } else if (errorMsg.includes('Missing required columns')) {
+                        showError('В таблице не найдены обязательные колонки. Убедитесь, что есть колонки: Организация, ФИО, Должность, Адрес');
+                    } else if (errorMsg.includes('Template file not found')) {
+                        showError('Файл шаблона не найден. Попробуйте загрузить файл заново.');
+                    } else {
+                        showError(errorMsg);
+                    }
+                }
+            } catch (err) {
+                showError('Ошибка соединения с сервером. Проверьте интернет и попробуйте снова.');
+            } finally {
+                setLoading(false);
             }
         });
     </script>

@@ -16,6 +16,16 @@ _morph = pymorphy3.MorphAnalyzer()
 _maker = PetrovichDeclinationMaker()
 
 
+def _is_uppercase(text: str) -> bool:
+    return text == text.upper() and text != text.lower()
+
+
+def _apply_case(text: str, is_upper: bool) -> str:
+    if is_upper:
+        return text.upper()
+    return text
+
+
 def detect_gender(firstname: str, patronymic: str) -> Gender:
     if not patronymic:
         if not firstname:
@@ -40,34 +50,43 @@ def detect_gender(firstname: str, patronymic: str) -> Gender:
 def decline_fio(surname: str, firstname: str, patronymic: str, gender: Gender) -> str:
     pytrovich_gender = PytrovichGender.MALE if gender == Gender.M else PytrovichGender.FEMALE
 
+    is_upper = _is_uppercase(surname) if surname else False
+
     declined_parts = []
 
     if surname:
-        declined = _maker.make(NamePart.LASTNAME, pytrovich_gender, Case.DATIVE, surname)
-        declined_parts.append(declined)
+        s_title = surname.title() if is_upper else surname
+        declined = _maker.make(NamePart.LASTNAME, pytrovich_gender, Case.DATIVE, s_title)
+        declined_parts.append(_apply_case(declined, is_upper))
 
     if firstname:
-        declined = _maker.make(NamePart.FIRSTNAME, pytrovich_gender, Case.DATIVE, firstname)
-        declined_parts.append(declined)
+        f_title = firstname.title() if is_upper else firstname
+        declined = _maker.make(NamePart.FIRSTNAME, pytrovich_gender, Case.DATIVE, f_title)
+        declined_parts.append(_apply_case(declined, is_upper))
 
     if patronymic:
-        declined = _maker.make(NamePart.MIDDLENAME, pytrovich_gender, Case.DATIVE, patronymic)
-        declined_parts.append(declined)
+        p_title = patronymic.title() if is_upper else patronymic
+        declined = _maker.make(NamePart.MIDDLENAME, pytrovich_gender, Case.DATIVE, p_title)
+        declined_parts.append(_apply_case(declined, is_upper))
 
-    return " ".join(declined_parts).upper()
+    return " ".join(declined_parts)
 
 
 def decline_position(position: str) -> str:
     if not position:
         return ""
 
+    is_upper = _is_uppercase(position)
+    
     words = position.split()
     declined_words = []
 
     for word in words:
-        parsed = _morph.parse(word)[0]
+        w_title = word.title() if is_upper else word
+        parsed = _morph.parse(w_title)[0]
         declined = parsed.inflect({"datv"})
-        declined_words.append(declined.word if declined else word)
+        result = declined.word if declined else w_title
+        declined_words.append(_apply_case(result, is_upper))
 
     return " ".join(declined_words)
 
@@ -77,5 +96,7 @@ def get_greeting(gender: Gender) -> str:
 
 
 def get_name_for_greeting(firstname: str, patronymic: str) -> str:
+    is_upper = _is_uppercase(firstname) if firstname else False
     parts = [p for p in [firstname, patronymic] if p]
-    return " ".join(parts).upper()
+    result = " ".join(parts)
+    return _apply_case(result, is_upper)

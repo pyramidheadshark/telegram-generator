@@ -175,8 +175,16 @@ async def generate(
                 "name_for_greeting": name_for_greeting,
             }
 
-            safe_name = "".join(c if c.isalnum() or c in " _-" else "_" for c in fullname)
-            output_filename = f"{idx + 1:03d}_{safe_name}.docx"
+            safe_surname = "".join(c if c.isalnum() or c in " _-" else "_" for c in surname)
+            initials = f"{firstname[0] if firstname else ''}{patronymic[0] if patronymic else ''}"
+            
+            org_short = record.get("organization", "")
+            org_short = "".join(c if c.isalnum() or c in " _-" else "_" for c in org_short)
+            if len(org_short) > 30:
+                words = org_short.split()
+                org_short = "_".join(words[:3])
+            
+            output_filename = f"{safe_surname}_{initials}_{org_short}.docx"
             output_path = output_dir / output_filename
 
             generate_telegram(word_path, data, str(output_path))
