@@ -50,80 +50,84 @@
         </div>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-bold text-gray-800 mb-3">Генератор телеграмм</h1>
-            <p class="text-lg text-gray-600">Автоматическое создание поздравительных телеграмм из данных Excel</p>
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Генератор телеграмм</h1>
+            <p class="text-gray-600">Создание поздравительных телеграмм из таблицы данных</p>
         </header>
 
+        <!-- ШАГ 1: Примеры для скачивания -->
         <section class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Шаблоны
-            </h2>
-            <p class="text-gray-600 mb-4">Скачайте шаблоны для заполнения данных:</p>
+            <div class="flex items-center gap-3 mb-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold">1</span>
+                <h2 class="text-xl font-semibold text-gray-800">Скачайте примеры</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Скачайте примеры, чтобы понять формат файлов:</p>
             <div class="flex flex-wrap gap-4">
                 <a href="/template/excel" 
                    class="inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
-                    Скачать шаблон Excel
+                    Пример таблицы
                 </a>
                 <a href="/template/word" 
                    class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
-                    Скачать пример шаблона Word
+                    Пример шаблона
                 </a>
             </div>
         </section>
 
+        <!-- ШАГ 2: Загрузка файлов -->
         <section class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                </svg>
-                Загрузка файлов
-            </h2>
+            <div class="flex items-center gap-3 mb-4">
+                <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold">2</span>
+                <h2 class="text-xl font-semibold text-gray-800">Загрузите ваши файлы</h2>
+            </div>
             
             <div class="grid md:grid-cols-2 gap-6">
+                <!-- Таблица -->
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Файл Excel с данными</label>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        Таблица с данными <span class="text-red-500">*</span>
+                    </label>
                     <form hx-post="/upload/excel" 
                           hx-encoding="multipart/form-data" 
                           hx-target="#excel-preview"
                           hx-indicator="#loading-indicator"
-                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
+                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
                           id="excel-form">
                         <input type="file" name="file" accept=".xlsx,.xls" class="hidden" id="excel-input">
-                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <p class="text-gray-600 mb-2">Перетащите Excel файл сюда</p>
-                        <p class="text-sm text-gray-500">или нажмите для выбора</p>
+                        <p class="text-gray-600 mb-1">Перетащите файл сюда</p>
+                        <p class="text-sm text-gray-500">или нажмите для выбора (.xlsx)</p>
                         <button type="submit" class="hidden">Загрузить</button>
                     </form>
                     <div id="excel-status" class="mt-2 text-sm"></div>
                 </div>
 
+                <!-- Шаблон -->
                 <div>
-                    <label class="block text-gray-700 font-medium mb-2">Шаблон Word (необязательно)</label>
+                    <label class="block text-gray-700 font-medium mb-2">
+                        Шаблон телеграммы <span class="text-gray-400 text-sm">(необязательно)</span>
+                    </label>
                     <form hx-post="/upload/word" 
                           hx-encoding="multipart/form-data" 
                           hx-target="#word-info"
                           hx-indicator="#loading-indicator"
-                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
+                          class="upload-zone border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition cursor-pointer bg-gray-50 hover:bg-primary-50"
                           id="word-form">
                         <input type="file" name="file" accept=".docx" class="hidden" id="word-input">
-                        <svg class="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        <p class="text-gray-600 mb-2">Перетащите Word файл сюда</p>
-                        <p class="text-sm text-gray-500">или нажмите для выбора</p>
+                        <p class="text-gray-600 mb-1">Перетащите файл сюда</p>
+                        <p class="text-sm text-gray-500">или нажмите для выбора (.docx)</p>
                         <button type="submit" class="hidden">Загрузить</button>
                     </form>
                     <div id="word-info" class="mt-2 text-sm"></div>
@@ -131,68 +135,111 @@
             </div>
         </section>
 
+        <!-- Предпросмотр данных -->
         <section class="bg-white rounded-xl shadow-md p-6 mb-6" id="data-section" style="display: none;">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                </svg>
-                Предпросмотр данных
-            </h2>
-            <div id="excel-preview">
-                <p class="text-gray-500 italic">Загрузите Excel файл для просмотра данных</p>
-            </div>
-        </section>
-
-        <section class="bg-white rounded-xl shadow-md p-6 mb-6" id="preview-section" style="display: none;">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                </svg>
-                Предпросмотр документа
-            </h2>
-            <div id="preview-container">
-                <div hx-get="/preview" hx-trigger="load" hx-target="#preview-container">
-                    <p class="text-gray-500 italic">Загрузите файлы для предпросмотра</p>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold">3</span>
+                    <h2 class="text-xl font-semibold text-gray-800">Проверьте данные</h2>
                 </div>
+                <span id="record-count" class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full"></span>
+            </div>
+            <div id="excel-preview">
+                <p class="text-gray-500 italic">Загрузите таблицу для просмотра</p>
             </div>
         </section>
 
-        <section class="bg-white rounded-xl shadow-md p-6 mb-6 text-center" id="generate-section" style="display: none;">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Готово к генерации</h2>
+        <!-- Кнопка генерации -->
+        <section class="bg-gradient-to-r from-accent-50 to-accent-100 rounded-xl shadow-md p-8 mb-6 text-center" id="generate-section" style="display: none;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">Всё готово!</h2>
             <p class="text-gray-600 mb-6">Нажмите кнопку для создания телеграмм</p>
-            <button hx-post="/generate"
-                    hx-indicator="#loading-indicator"
-                    hx-on::hx-response-error="alert('Ошибка при генерации: ' + event.detail.error)"
-                    class="inline-flex items-center gap-3 bg-accent-600 hover:bg-accent-700 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg hover:shadow-xl text-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                Сгенерировать телеграммы
-            </button>
+            <form hx-post="/generate"
+                  hx-encoding="multipart/form-data"
+                  hx-indicator="#loading-indicator"
+                  hx-on::hx-response-error="alert('Ошибка: ' + event.detail.error)">
+                <input type="file" name="excel_file" id="final-excel" class="hidden">
+                <input type="file" name="word_file" id="final-word" class="hidden">
+                <button type="submit" class="inline-flex items-center gap-3 bg-accent-600 hover:bg-accent-700 text-white font-bold py-4 px-10 rounded-xl transition shadow-lg hover:shadow-xl text-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    Сгенерировать телеграммы
+                </button>
+            </form>
         </section>
 
+        <!-- Справка по меткам -->
         <section class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <button class="w-full flex items-center justify-between text-left"
-                    onclick="toggleInstructions()"
-                    type="button">
-                <h2 class="text-2xl font-semibold text-gray-800 flex items-center gap-2">
+            <button class="w-full flex items-center justify-between text-left" onclick="toggleInstructions()" type="button">
+                <div class="flex items-center gap-3">
                     <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Инструкция
-                </h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Как создавать шаблоны</h2>
+                </div>
                 <svg class="w-6 h-6 text-gray-500 transform transition-transform" id="instructions-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
-            <div id="instructions-content" class="hidden mt-4">
-                {% include 'partials/instructions.html' %}
+            <div id="instructions-content" class="hidden mt-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p class="text-gray-700"><strong>Метка</strong> — это текст в двойных фигурных скобках: <code class="bg-white px-2 py-1 rounded text-primary-700">{{метка}}</code></p>
+                    <p class="text-gray-600 mt-2">При генерации метка автоматически заменится на данные из таблицы.</p>
+                </div>
+                
+                <h3 class="font-semibold text-gray-800 mb-3">Доступные метки:</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="text-left py-2 px-3 rounded-l-lg">Метка</th>
+                                <th class="text-left py-2 px-3">Описание</th>
+                                <th class="text-left py-2 px-3 rounded-r-lg">Пример результата</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{адрес}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">Адрес получателя</td>
+                                <td class="py-2 px-3 text-gray-500">117997, Г. МОСКВА, УЛ. ВАВИЛОВА, Д. 19</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{организация}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">Название организации</td>
+                                <td class="py-2 px-3 text-gray-500">ПАО «СБЕРБАНК»</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{должность_дат}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">Должность в дательном падеже</td>
+                                <td class="py-2 px-3 text-gray-500">ГЕНЕРАЛЬНОМУ ДИРЕКТОРУ</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{фио_дат}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">ФИО в дательном падеже</td>
+                                <td class="py-2 px-3 text-gray-500">БАКАНОВУ ДМИТРИЮ ВЛАДИМИРОВИЧУ</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{имя_отчество}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">Имя и отчество</td>
+                                <td class="py-2 px-3 text-gray-500">ДМИТРИЙ ВЛАДИМИРОВИЧ</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 px-3"><code class="bg-gray-100 px-2 py-1 rounded text-primary-700">{{уважаемый}}</code></td>
+                                <td class="py-2 px-3 text-gray-600">Приветствие (определяется по полу)</td>
+                                <td class="py-2 px-3 text-gray-500">УВАЖАЕМЫЙ или УВАЖАЕМАЯ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-gray-700"><strong>💡 Совет:</strong> Скачайте «Пример шаблона» выше — там уже расставлены все метки. Скопируйте его и измените текст поздравления.</p>
+                </div>
             </div>
         </section>
 
         <footer class="text-center text-gray-500 text-sm mt-8">
-            <p>Генератор телеграмм &copy; 2024</p>
+            <p>Генератор телеграмм</p>
         </footer>
     </div>
 
@@ -203,6 +250,9 @@
             content.classList.toggle('hidden');
             arrow.classList.toggle('rotate-180');
         }
+
+        let excelFile = null;
+        let wordFile = null;
 
         document.querySelectorAll('.upload-zone').forEach(zone => {
             zone.addEventListener('click', function(e) {
@@ -216,10 +266,18 @@
                 if (this.files.length > 0) {
                     const form = this.closest('form');
                     const fileName = this.files[0].name;
-                    const statusDiv = form.id === 'excel-form' 
-                        ? document.getElementById('excel-status') 
-                        : document.getElementById('word-info');
-                    statusDiv.innerHTML = '<span class="text-primary-600">Файл: ' + fileName + '</span>';
+                    const isExcel = form.id === 'excel-form';
+                    
+                    if (isExcel) {
+                        excelFile = this.files[0];
+                        document.getElementById('excel-status').innerHTML = 
+                            '<span class="text-accent-600 font-medium">✓ ' + fileName + '</span>';
+                    } else {
+                        wordFile = this.files[0];
+                        document.getElementById('word-info').innerHTML = 
+                            '<span class="text-accent-600 font-medium">✓ ' + fileName + '</span>';
+                    }
+                    
                     form.dispatchEvent(new Event('submit', { cancelable: true }));
                 }
             });
@@ -248,8 +306,20 @@
         document.body.addEventListener('htmx:afterSwap', function(evt) {
             if (evt.target.id === 'excel-preview') {
                 document.getElementById('data-section').style.display = 'block';
-                document.getElementById('preview-section').style.display = 'block';
                 document.getElementById('generate-section').style.display = 'block';
+            }
+        });
+
+        document.querySelector('form[hx-post="/generate"]').addEventListener('submit', function(e) {
+            if (excelFile) {
+                const dt = new DataTransfer();
+                dt.items.add(excelFile);
+                document.getElementById('final-excel').files = dt.files;
+            }
+            if (wordFile) {
+                const dt = new DataTransfer();
+                dt.items.add(wordFile);
+                document.getElementById('final-word').files = dt.files;
             }
         });
     </script>

@@ -46,3 +46,4 @@ output/
 !word_templates/*.docx
 *.xlsx
 !templates/*.xlsx
+!word_templates/*.xlsx

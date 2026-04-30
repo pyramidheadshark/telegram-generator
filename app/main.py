@@ -1,10 +1,10 @@
 import io
 import zipfile
+from datetime import datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
-import aiofiles
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -33,7 +33,7 @@ env = Environment(
     autoescape=select_autoescape(["html", "xml"]),
 )
 
-app = FastAPI(title="Telegram Generator")
+app = FastAPI(title="Генератор телеграмм")
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
@@ -51,32 +51,35 @@ async def index() -> str:
 
 @app.get("/template/excel")
 async def download_excel_template() -> FileResponse:
-    template_path = WORD_TEMPLATES_DIR / "template.xlsx"
+    """Скачать пример таблицы с данными"""
+    template_path = WORD_TEMPLATES_DIR / "primer_tablicy.xlsx"
     if not template_path.exists():
-        raise HTTPException(status_code=404, detail="Excel template not found")
+        raise HTTPException(status_code=404, detail="Файл шаблона не найден")
     return FileResponse(
         path=template_path,
-        filename="template.xlsx",
+        filename="primer_tablicy.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
 @app.get("/template/word")
 async def download_word_template() -> FileResponse:
-    template_path = WORD_TEMPLATES_DIR / "template.docx"
+    """Скачать пример шаблона телеграммы с метками"""
+    template_path = WORD_TEMPLATES_DIR / "primer_shablona.docx"
     if not template_path.exists():
-        raise HTTPException(status_code=404, detail="Word template not found")
+        raise HTTPException(status_code=404, detail="Файл шаблона не найден")
     return FileResponse(
         path=template_path,
-        filename="template.docx",
+        filename="primer_shablona.docx",
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
 
 
 @app.post("/upload/excel")
 async def upload_excel(file: UploadFile = File(...)) -> dict[str, Any]:
+    """Загрузить и проверить таблицу с данными"""
     if not file.filename or not file.filename.endswith((".xlsx", ".xls")):
-        raise HTTPException(status_code=400, detail="File must be an Excel file (.xlsx or .xls)")
+        raise HTTPException(status_code=400, detail="Файл должен быть в формате Excel (.xlsx или .xls)")
 
     with NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
         content = await file.read()
@@ -95,8 +98,9 @@ async def upload_excel(file: UploadFile = File(...)) -> dict[str, Any]:
 
 @app.post("/upload/word")
 async def upload_word(file: UploadFile = File(...)) -> dict[str, Any]:
+    """Загрузить и проверить шаблон телеграммы"""
     if not file.filename or not file.filename.endswith(".docx"):
-        raise HTTPException(status_code=400, detail="File must be a Word document (.docx)")
+        raise HTTPException(status_code=400, detail="Файл должен быть в формате Word (.docx)")
 
     with NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
         content = await file.read()
@@ -121,10 +125,11 @@ async def generate(
     excel_file: UploadFile = File(...),
     word_file: UploadFile = File(...),
 ) -> StreamingResponse:
+    """Сгенерировать телеграммы и вернуть архив"""
     if not excel_file.filename or not excel_file.filename.endswith((".xlsx", ".xls")):
-        raise HTTPException(status_code=400, detail="Excel file must be .xlsx or .xls")
+        raise HTTPException(status_code=400, detail="Таблица должна быть в формате .xlsx или .xls")
     if not word_file.filename or not word_file.filename.endswith(".docx"):
-        raise HTTPException(status_code=400, detail="Word file must be .docx")
+        raise HTTPException(status_code=400, detail="Шаблон должен быть в формате .docx")
 
     with NamedTemporaryFile(delete=False, suffix=".xlsx") as excel_tmp:
         excel_content = await excel_file.read()
@@ -144,7 +149,7 @@ async def generate(
         errors = validate_template(word_path)
 
         if errors:
-            raise HTTPException(status_code=400, detail=f"Template errors: {', '.join(errors)}")
+            raise HTTPException(status_code=400, detail=f"Ошибки в шаблоне: {', '.join(errors)}")
 
         generated_files = []
 
@@ -177,6 +182,10 @@ async def generate(
             generate_telegram(word_path, data, str(output_path))
             generated_files.append(output_path)
 
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d_%H-%M")
+        zip_filename = f"telegrammy_{timestamp}.zip"
+
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
             for file_path in generated_files:
@@ -187,7 +196,7 @@ async def generate(
         return StreamingResponse(
             io.BytesIO(zip_buffer.read()),
             media_type="application/zip",
-            headers={"Content-Disposition": "attachment; filename=telegrams.zip"},
+            headers={"Content-Disposition": f"attachment; filename={zip_filename}"},
         )
 
     finally:
@@ -202,10 +211,11 @@ async def preview(
     word_file: UploadFile = File(...),
     data: str = "{}",
 ) -> dict[str, str]:
+    """Сгенерировать превью телеграммы"""
     import json
 
     if not word_file.filename or not word_file.filename.endswith(".docx"):
-        raise HTTPException(status_code=400, detail="Word file must be .docx")
+        raise HTTPException(status_code=400, detail="Шаблон должен быть в формате .docx")
 
     with NamedTemporaryFile(delete=False, suffix=".docx") as word_tmp:
         word_content = await word_file.read()
